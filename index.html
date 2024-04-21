@@ -34,9 +34,9 @@
                 -5px -5px 10px #ffffff;
     resize: none;
     font-size: 16px;
-    text-transform: uppercase !important;
+    text-transform: uppercase;
   }
-  div {
+  div, button {
     margin-top: 10px;
     font-size: 16px;
     color: #333;
@@ -45,6 +45,8 @@
     padding: 10px 20px;
     box-shadow: inset 5px 5px 10px #cbcbcb, 
                 inset -5px -5px 10px #ffffff;
+    border: none;
+    cursor: pointer;
   }
 </style>
 </head>
@@ -53,6 +55,7 @@
   <h2>My Dumb Rune Name:</h2>
   <textarea id="textInput" oninput="updateCharacterCount()" placeholder="Type here..."></textarea>
   <div id="charCount">Characters: 0</div>
+  <button onclick="saveTextAsFile()">💾</button>
 </div>
 
 <script>
@@ -84,6 +87,37 @@ document.getElementById('textInput').addEventListener('keydown', function(event)
     updateCharacterCount();
   }
 });
+
+function saveTextAsFile() {
+  var textToWrite = document.getElementById('textInput').value;
+  var textFileAsBlob = new Blob([textToWrite], {type: 'text/plain;charset=utf-8'});
+
+  // Generate a filename based on the text content, removing spaces and non-alphanumeric characters
+  var baseFileName = textToWrite.replace(/[\s•]+/g, ''); // Remove spaces and bullets
+  var fileNameToSaveAs = 'rune_' + baseFileName + '.txt'; // Prefix "rune_" and suffix ".txt"
+
+  var downloadLink = document.createElement("a");
+  downloadLink.download = fileNameToSaveAs;
+  downloadLink.innerHTML = "Download File";
+  if (window.webkitURL != null) {
+    // Chrome allows the link to be clicked without actually adding it to the DOM
+    downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+  } else {
+    // Firefox requires the link to be added to the DOM before it can be clicked
+    downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+    downloadLink.onclick = destroyClickedElement;
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+  }
+
+  downloadLink.click();
+}
+
+function destroyClickedElement(event) {
+  // Remove the link from the DOM
+  document.body.removeChild(event.target);
+}
+
 </script>
 </body>
 </html>
